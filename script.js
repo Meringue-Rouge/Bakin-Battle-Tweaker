@@ -19,7 +19,7 @@ const translations = {
             allyTarget: "Ally Target (Healing/Items/Support)",
             enemyTarget: "Enemy Target (Attack/Offense Skills)"
         },
-        helpLink: "How do I obtain the GUID of my Custom Cameras?"
+        helpLink: "https://github.com/Meringue-Rouge/bakin-battle-system-snippets/blob/main/Finding%20your%20camera%20GUIDs.md"
     },
     ja: {
         pageTitle: "RPG Developer Bakin バトルスクリプトモディファイア",
@@ -34,7 +34,7 @@ const translations = {
             allyTarget: "味方ターゲット（回復/アイテム/サポート）",
             enemyTarget: "敵ターゲット（攻撃/攻撃スキル）"
         },
-        helpLink: "カスタムカメラのGUIDをどうやって取得しますか？"
+        helpLink: "https://github.com/Meringue-Rouge/bakin-battle-system-snippets/blob/main/Finding%20your%20camera%20GUIDs.md"
     }
 };
 
@@ -113,7 +113,7 @@ function renderOptions() {
                         <input type="text" id="param-enemyTarget-2" value="${opt.parameters.enemyTarget || ''}" placeholder="Enter GUID">
                     </div>
                     <div class="help-link">
-                        <a href="https://github.com/Meringue-Rouge/bakin-battle-system-snippets/blob/main/Finding%20your%20camera%20GUIDs.md" target="_blank">❓ ${translations[currentLanguage].helpLink}</a>
+                        <a href="${translations[currentLanguage].helpLink}" target="_blank">❓ ${translations[currentLanguage].helpLink}</a>
                     </div>
                 </div>
             `;
@@ -255,8 +255,8 @@ function rebuildModifiedCode() {
             let code = opt.code;
             if (opt.parameters) {
                 code = code.replace("/* PLAYER DEC */", opt.parameters.playerDec || "5f73a3bc-830a-404b-afa1-87a2f4eaf2f0")
-                          .replace("/* ALLY TARGET */", opt.parameters.allyTarget || "6ff4c3a2-a5f1-4d46-86d9-5078d0d2cff6")
-                          .replace("/* ENEMY TARGET */", opt.parameters.enemyTarget || "01ab9724-6b93-4440-b55a-2f91def556b8");
+                          .replace("/* ALLY TARGET */", opt.parameters.allyTarget || "6ff8c4a2-a1f1-4d4e-86d9-5078e0d2cff6")
+                          .replace("/* ENEMY TARGET */", opt.parameters.enemyTarget || "01ab9f24-6b93-4440-9b5a-4f91e0f556b8");
             }
             if (opt.file === "BattleViewer3D") {
                 modifiedBattleViewer3D = insertAfterLine(modifiedBattleViewer3D, opt.insertAfter, code, opt.emoji, opt.name.en, opt.isFunctionReplacement);
@@ -276,7 +276,7 @@ function exportCode() {
     zip.generateAsync({ type: "blob" }).then(content => {
         const link = document.createElement('a');
         link.href = URL.createObjectURL(content);
-        link.download = "modified_battle_scripts.zip";
+        link.download = "modified_code.zip";
         link.click();
     });
 }
@@ -288,10 +288,10 @@ function saveOptions() {
         parameters: opt.parameters || null
     }));
     localStorage.setItem('optionsState', JSON.stringify(state));
-    alert(currentLanguage === 'en' ? 'Options saved!' : 'オプションが保存されました！');
+    alert(currentLanguage === 'en' ? 'Options saved successfully!' : 'オプションが保存されました！');
 }
 
-// Load options state from local storage
+// Load options from local storage
 function loadOptions() {
     const state = JSON.parse(localStorage.getItem('optionsState'));
     if (state) {
@@ -303,13 +303,13 @@ function loadOptions() {
         });
         renderOptions();
         rebuildModifiedCode();
-        alert(currentLanguage === 'en' ? 'Options loaded!' : 'オプションが読み込まれました！');
+        alert(currentLanguage === 'en' ? 'Options loaded successfully!' : 'オプションが読み込まれました！');
     } else {
         alert(currentLanguage === 'en' ? 'No saved options found.' : '保存されたオプションが見つかりません。');
     }
 }
 
-// Reset options to default (all off)
+// Reset options to default
 function resetToDefault() {
     options.forEach((opt, index) => {
         opt.enabled = false;

@@ -113,7 +113,7 @@ function renderOptions() {
                         <input type="text" id="param-enemyTarget-2" value="${opt.parameters.enemyTarget || ''}" placeholder="Enter GUID">
                     </div>
                     <div class="help-link">
-                        <a href="https://meringue-rouge.github.io/" target="_blank">❓ ${translations[currentLanguage].helpLink}</a>
+                        <a href="https://github.com/Meringue-Rouge/bakin-battle-system-snippets/blob/main/Finding%20your%20camera%20GUIDs.md" target="_blank">❓ ${translations[currentLanguage].helpLink}</a>
                     </div>
                 </div>
             `;

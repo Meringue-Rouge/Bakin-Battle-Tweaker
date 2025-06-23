@@ -185,6 +185,13 @@ function renderOptions() {
                 }
             }
         });
+
+        // Allow clicking anywhere on the option to toggle the checkbox
+        div.addEventListener('click', (e) => {
+            if (e.target.tagName !== 'INPUT' && !div.classList.contains('disabled-option')) {
+                checkbox.click();
+            }
+        });
     });
 }
 

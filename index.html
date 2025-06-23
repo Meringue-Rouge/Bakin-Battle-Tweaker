@@ -7,17 +7,28 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <h1 id="page-title">RPG Developer Bakin Battle Script Modifier</h1>
-    <select id="language-switcher" onchange="switchLanguage()">
-        <option value="en">English</option>
-        <option value="ja">日本語</option>
-    </select>
-    <div id="options"></div>
-    <button id="export-btn" onclick="exportCode()">Export Code</button>
-    <button id="save-btn" onclick="saveOptions()">Save Options</button>
-    <button id="load-btn" onclick="loadOptions()">Load Options</button>
-    <button id="reset-btn" onclick="resetToDefault()">Reset to Default</button>
+<body class="y2k-theme">
+    <div class="main-container">
+        <div class="left-panel">
+            <h1 id="page-title">RPG Developer Bakin Battle Script Modifier</h1>
+            <label class="language-label">Language</label>
+            <select id="language-switcher" class="language-selector" onchange="switchLanguage()">
+                <option value="en">English</option>
+                <option value="ja">日本語</option>
+            </select>
+            <div class="export-container">
+                <button id="export-btn" class="action-button export-button" onclick="exportCode()">Export Code</button>
+            </div>
+            <div class="config-buttons">
+                <button id="save-btn" class="action-button config-button" onclick="saveOptions()">Save Options</button>
+                <button id="load-btn" class="action-button config-button" onclick="loadOptions()">Load Options</button>
+                <button id="reset-btn" class="action-button config-button" onclick="resetToDefault()">Reset to Default</button>
+            </div>
+        </div>
+        <div class="right-panel">
+            <div id="options"></div>
+        </div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>

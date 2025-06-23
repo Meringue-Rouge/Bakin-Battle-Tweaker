@@ -7,7 +7,7 @@ let currentLanguage = 'en';
 
 const translations = {
     en: {
-        pageTitle: "RPG Developer Bakin Battle Script Modifier",
+        pageTitle: "RPG Developer Bakin Battle System Tweaker",
         exportBtn: "Export Code",
         saveBtn: "Save Options",
         loadBtn: "Load Options",
@@ -22,7 +22,7 @@ const translations = {
         helpLink: "https://github.com/Meringue-Rouge/bakin-battle-system-snippets/blob/main/Finding%20your%20camera%20GUIDs.md"
     },
     ja: {
-        pageTitle: "RPG Developer Bakin バトルスクリプトモディファイア",
+        pageTitle: "RPG Developer Bakin バトルシステムツイーカー",
         exportBtn: "コードをエクスポート",
         saveBtn: "オプションを保存",
         loadBtn: "オプションを読み込み",

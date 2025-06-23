@@ -1,0 +1,45 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+.option {
+    margin: 10px 0;
+}
+.description {
+    font-style: italic;
+    margin-left: 24px;
+    font-size: 0.9em;
+}
+.parameters {
+    margin: 10px 0 10px 24px;
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+.parameters-disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+.parameters-container {
+    margin-bottom: 10px;
+}
+.param-field {
+    margin: 5px 0;
+}
+.param-label {
+    font-weight: bold;
+}
+button {
+    margin: 5px;
+    padding: 5px 10px;
+}
+select {
+    margin: 10px 0;
+}
+.disabled-option {
+    opacity: 0.5;
+    pointer-events: none;
+}
+.help-link {
+    margin-left: 24px;
+    font-size: 0.9em;
+}

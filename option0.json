@@ -1,0 +1,14 @@
+{
+  "emoji": "🕒",
+  "name": {
+    "en": "Common Event Before Turn Execution",
+    "ja": "ターン実行前の共通イベント"
+  },
+  "description": {
+    "en": "Executes a common event named 'Before_Turn_Execution' before each turn in the battle.",
+    "ja": "バトル中の各ターンの前に「Before_Turn_Execution」という名前の共通イベントを実行します。"
+  },
+  "file": "BattleSequenceManager",
+  "insertAfter": "battleEvents.clearCurrentProcessingTrigger();",
+  "code": "var guid = catalog.getGameSettings().commonEvents.FirstOrDefault(x => catalog.getItemFromGuid(x)?.name == \"Before_Turn_Execution\");\nif(guid != Guid.Empty)\n{\n    battleEvents.start(guid);\n}"
+}

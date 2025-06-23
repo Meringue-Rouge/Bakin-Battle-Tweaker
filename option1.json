@@ -1,0 +1,14 @@
+{
+  "emoji": "🔒",
+  "name": {
+    "en": "Player Decision Player Target Lock",
+    "ja": "プレイヤー決定プレイヤーターゲットロック"
+  },
+  "description": {
+    "en": "Locks the target to the skill user when a player makes a decision in battle.",
+    "ja": "バトル中にプレイヤーが決定を行う際、ターゲットをスキル使用者にロックします。"
+  },
+  "file": "BattleViewer3D",
+  "insertAfter": "turnChr[i]?.setVisibility(true);",
+  "code": "skillUser = friend;"
+}

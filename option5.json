@@ -1,0 +1,15 @@
+{
+  "emoji": "🚫",
+  "name": {
+    "en": "Disable Camera Return: Attack",
+    "ja": "カメラリターンの無効化：攻撃"
+  },
+  "description": {
+    "en": "Comments out the restoreCamera call for Attack, Critical, or ForceCritical actions.",
+    "ja": "攻撃、クリティカル、または強制クリティカルアクションのrestoreCamera呼び出しをコメントアウトします。"
+  },
+  "file": "BattleViewer3D",
+  "insertAfter": "case BattleCommandType.Attack",
+  "isFunctionReplacement": false,
+  "code": ""
+}

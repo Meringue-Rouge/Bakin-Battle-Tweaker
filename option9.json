@@ -1,0 +1,15 @@
+{
+  "emoji": "🚫",
+  "name": {
+    "en": "Disable Camera Return: Enter",
+    "ja": "カメラリターンの無効化：参加"
+  },
+  "description": {
+    "en": "Comments out the restoreCamera call for Enter actions.",
+    "ja": "参加アクションのrestoreCamera呼び出しをコメントアウトします。"
+  },
+  "file": "BattleViewer3D",
+  "insertAfter": "case BattleCommandType.Enter",
+  "isFunctionReplacement": false,
+  "code": ""
+}

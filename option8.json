@@ -1,0 +1,15 @@
+{
+  "emoji": "🚫",
+  "name": {
+    "en": "Disable Camera Return: Change",
+    "ja": "カメラリターンの無効化：交代"
+  },
+  "description": {
+    "en": "Comments out the restoreCamera call for Change actions.",
+    "ja": "交代アクションのrestoreCamera呼び出しをコメントアウトします。"
+  },
+  "file": "BattleViewer3D",
+  "insertAfter": "case BattleCommandType.Change",
+  "isFunctionReplacement": false,
+  "code": ""
+}

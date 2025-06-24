@@ -1,0 +1,15 @@
+{
+  "emoji": "🚫",
+  "name": {
+    "en": "Disable Camera Return: Skill",
+    "ja": "カメラリターンの無効化：スキル"
+  },
+  "description": {
+    "en": "Comments out the restoreCamera call for Skill or SameSkillEffect actions.",
+    "ja": "スキルまたは同じスキルエフェクトアクションのrestoreCamera呼び出しをコメントアウトします。"
+  },
+  "file": "BattleViewer3D",
+  "insertAfter": "case BattleCommandType.Skill",
+  "isFunctionReplacement": false,
+  "code": ""
+}

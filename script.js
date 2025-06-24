@@ -75,16 +75,48 @@ async function loadOptionsFiles() {
         if (!response3.ok) throw new Error('Failed to load option3.json');
         const option3 = await response3.json();
 
-        options = [option0, option1, option2, option3];
+        const response4 = await fetch('option4.json');
+        if (!response4.ok) throw new Error('Failed to load option4.json');
+        const option4 = await response4.json();
+
+        const response5 = await fetch('option5.json');
+        if (!response5.ok) throw new Error('Failed to load option5.json');
+        const option5 = await response5.json();
+
+        const response6 = await fetch('option6.json');
+        if (!response6.ok) throw new Error('Failed to load option6.json');
+        const option6 = await response6.json();
+
+        const response7 = await fetch('option7.json');
+        if (!response7.ok) throw new Error('Failed to load option7.json');
+        const option7 = await response7.json();
+
+        const response8 = await fetch('option8.json');
+        if (!response8.ok) throw new Error('Failed to load option8.json');
+        const option8 = await response8.json();
+
+        const response9 = await fetch('option9.json');
+        if (!response9.ok) throw new Error('Failed to load option9.json');
+        const option9 = await response9.json();
+
+        const response10 = await fetch('option10.json');
+        if (!response10.ok) throw new Error('Failed to load option10.json');
+        const option10 = await response10.json();
+
+        const response11 = await fetch('option11.json');
+        if (!response11.ok) throw new Error('Failed to load option11.json');
+        const option11 = await response11.json();
+
+        options = [option0, option1, option2, option3, option4, option5, option6, option7, option8, option9, option10, option11];
         options.forEach(opt => {
             opt.enabled = false;
-            if (!opt.parameters) opt.parameters = { playerDec: '', allyTarget: '', enemyTarget: '' };
+            if (!opt.parameters) opt.parameters = null;
         });
         renderOptions();
         rebuildModifiedCode();
     } catch (error) {
         console.error(error);
-        alert('Error loading option files. Ensure option0.json, option1.json, option2.json, and option3.json are in the same directory.');
+        alert('Error loading option files. Ensure all option files (option0.json to option11.json) are in the same directory.');
     }
 }
 
@@ -205,10 +237,10 @@ function renderOptions() {
 function insertAfterLine(code, afterLine, insertCode, emoji, optionName, isFunctionReplacement = false) {
     if (isFunctionReplacement) {
         // Match the function signature and its entire body by counting braces
-        const regex = /private\s+void\s+UpdateBattleState_SortBattleActions\s*\(\s*\)\s*\{/;
+        const regex = /(private\s+void\s+UpdateBattleState_SortBattleActions\s*\(\s*\)\s*\{)|(internal\s+override\s+void\s+Update\s*\(\s*List<BattlePlayerData>\s+playerData\s*,\s*List<BattleEnemyData>\s+enemyMonsterData\s*\)\s*\{)/;
         const match = code.match(regex);
         if (!match) {
-            console.error(`UpdateBattleState_SortBattleActions function signature not found for ${optionName}`);
+            console.error(`Function signature not found for ${optionName}`);
             return code;
         }
 
@@ -224,12 +256,12 @@ function insertAfterLine(code, afterLine, insertCode, emoji, optionName, isFunct
         }
 
         if (braceCount !== 0) {
-            console.error(`Failed to find closing brace for UpdateBattleState_SortBattleActions for ${optionName}`);
+            console.error(`Failed to find closing brace for function for ${optionName}`);
             return code;
         }
 
         const matchedFunction = code.substring(match.index, endIndex);
-        console.log(`Replacing UpdateBattleState_SortBattleActions for ${optionName}, matched length: ${matchedFunction.length}, excerpt: ${matchedFunction.slice(0, 100)}...`);
+        console.log(`Replacing function for ${optionName}, matched length: ${matchedFunction.length}, excerpt: ${matchedFunction.slice(0, 100)}...`);
 
         const indent = code.match(/^\s*/)[0] || '';
         const commentedCode = `${indent}// ${emoji} - START - ${optionName}\n${insertCode}\n${indent}// ${emoji} - END - ${optionName}`;
@@ -237,14 +269,28 @@ function insertAfterLine(code, afterLine, insertCode, emoji, optionName, isFunct
     } else {
         const lines = code.split('\n');
         const newLines = [];
+        let inSwitchCase = false;
+        let switchCaseName = '';
+        let foundSwitch = false;
+
         for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
             newLines.push(lines[i]);
-            if (lines[i].includes(afterLine)) {
+
+            // Detect switch case start
+            if (line.startsWith('case BattleCommandType.')) {
+                inSwitchCase = true;
+                switchCaseName = line.match(/case BattleCommandType\.(\w+)/)[1];
+                foundSwitch = true;
+            } else if (line === 'break;' && inSwitchCase) {
+                inSwitchCase = false;
+                switchCaseName = '';
+            }
+
+            // Check if the current line contains restoreCamera and matches the option's switch case
+            if (line.includes('restoreCamera') && foundSwitch && optionName.includes(switchCaseName)) {
                 const indent = lines[i].match(/^\s*/)[0];
-                newLines.push(`${indent}// ${emoji} - START - ${optionName}`);
-                const insertLines = insertCode.split('\n').map(l => `${indent}${l}`);
-                newLines.push(...insertLines);
-                newLines.push(`${indent}// ${emoji} - END - ${optionName}`);
+                newLines[i] = `${indent}// ${emoji} - ${optionName}: Disabled restoreCamera\n${indent}// ${lines[i].trim()}`;
             }
         }
         return newLines.join('\n');

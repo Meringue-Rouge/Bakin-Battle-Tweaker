@@ -9,9 +9,11 @@
     display: flex;
     flex-direction: row;
     min-height: 100vh;
+    max-height: 100vh;
     border-radius: 16px;
     box-shadow: 0 10px 30px rgba(255, 0, 0, 0.3);
     background: #fff;
+    overflow: hidden;
 }
 
 .left-panel {
@@ -22,6 +24,7 @@
     box-sizing: border-box;
     background: rgba(255, 255, 255, 0.2);
     border-radius: 16px 0 0 16px;
+    overflow-y: auto;
 }
 
 .left-panel h1 {
@@ -235,6 +238,8 @@
     overflow-y: auto;
     background: linear-gradient(135deg, #fff, #ffeeee);
     border-radius: 0 16px 16px 0;
+    max-height: 100vh;
+    box-sizing: border-box;
 }
 
 .option {
@@ -412,6 +417,7 @@
     .main-container {
         flex-direction: column;
         height: auto;
+        max-height: none;
     }
     .left-panel {
         width: 100%;
@@ -458,6 +464,7 @@
     }
     .right-panel {
         padding: 10px;
+        max-height: none;
     }
     .option {
         padding: 10px;

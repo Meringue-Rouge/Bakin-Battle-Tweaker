@@ -1,0 +1,15 @@
+{
+  "emoji": "🚫",
+  "name": {
+    "en": "Disable Camera Return: Nothing/Skip",
+    "ja": "カメラリターンの無効化：何もしない/スキップ"
+  },
+  "description": {
+    "en": "Comments out the restoreCamera call for Nothing or Skip actions.",
+    "ja": "何もしないまたはスキップアクションのrestoreCamera呼び出しをコメントアウトします。"
+  },
+  "file": "BattleViewer3D",
+  "insertAfter": "case BattleCommandType.Nothing",
+  "isFunctionReplacement": false,
+  "code": ""
+}

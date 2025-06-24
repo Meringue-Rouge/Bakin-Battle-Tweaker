@@ -1,0 +1,15 @@
+{
+  "emoji": "🚫",
+  "name": {
+    "en": "Disable Camera Return: Guard",
+    "ja": "カメラリターンの無効化：ガード"
+  },
+  "description": {
+    "en": "Comments out the restoreCamera call for Guard actions.",
+    "ja": "ガードアクションのrestoreCamera呼び出しをコメントアウトします。"
+  },
+  "file": "BattleViewer3D",
+  "insertAfter": "case BattleCommandType.Guard",
+  "isFunctionReplacement": false,
+  "code": ""
+}

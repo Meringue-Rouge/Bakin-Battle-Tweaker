@@ -5,8 +5,8 @@
     "ja": "カメラリターンの無効化：何もしない/スキップ"
   },
   "description": {
-    "en": "Comments out the restoreCamera call for Nothing or Skip actions.",
-    "ja": "何もしないまたはスキップアクションのrestoreCamera呼び出しをコメントアウトします。"
+    "en": "The Standby camera will not be restored for Nothing or Skip actions. This prevents the camera from returning to the Standby position after these actions.",
+    "ja":  "何もしないやスキップのアクションでは、スタンバイカメラが復元されません。これにより、これらのアクション後にカメラがスタンバイ位置に戻ることを防ぎます。"
   },
   "file": "BattleViewer3D",
   "insertAfter": "case BattleCommandType.Nothing",

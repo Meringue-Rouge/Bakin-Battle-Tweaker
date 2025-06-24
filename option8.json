@@ -5,8 +5,8 @@
     "ja": "カメラリターンの無効化：交代"
   },
   "description": {
-    "en": "Comments out the restoreCamera call for Change actions.",
-    "ja": "交代アクションのrestoreCamera呼び出しをコメントアウトします。"
+    "en": "The standby camera will not be restored for Change actions that call restoreCamera. This prevents the camera from returning to the Standby position after these actions.",
+    "ja": "交代アクションでは、スタンバイカメラが復元されません。これにより、これらのアクション後にカメラがスタンバイ位置に戻ることを防ぎます。"
   },
   "file": "BattleViewer3D",
   "insertAfter": "case BattleCommandType.Change",

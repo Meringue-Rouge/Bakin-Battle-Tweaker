@@ -5,8 +5,8 @@
     "ja": "カメラリターンの無効化：撤退"
   },
   "description": {
-    "en": "Comments out the restoreCamera call for Leave actions.",
-    "ja": "撤退アクションのrestoreCamera呼び出しをコメントアウトします。"
+    "en": "The Standby camera will not be restored for Leave actions. This prevents the camera from returning to the Standby position after these actions.",
+    "ja": "撤退のアクションでは、スタンバイカメラが復元されません。これにより、これらのアクション後にカメラがスタンバイ位置に戻ることを防ぎます。"
   },
   "file": "BattleViewer3D",
   "insertAfter": "case BattleCommandType.Leave",

@@ -5,8 +5,8 @@
     "ja": "優先攻撃"
   },
   "description": {
-    "en": "Prioritizes attacks tagged #highpriority first, #lowpriority last, and untagged attacks in between, all sorted by speed.",
-    "ja": "#highpriorityタグの攻撃を最初に、#lowpriorityタグを最後に、タグなしの攻撃を間に配置し、すべてスピードでソートします。"
+    "en": "Adds attack speed priorities: skills tagged #highpriority will always go first, #lowpriority always last, and untagged attacks in between, all sorted by speed.",
+    "ja": "攻撃速度の優先順位が追加される。#highpriorityとタグ付けされたスキルは常に最初、#lowpriorityは常に最後、そしてタグ付けされていない攻撃はその中間で、すべて速度順にソートされる。"
   },
   "file": "BattleSequenceManager",
   "insertAfter": "UpdateBattleState_SortBattleActions",

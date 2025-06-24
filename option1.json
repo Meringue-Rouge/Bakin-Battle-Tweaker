@@ -5,8 +5,8 @@
     "ja": "プレイヤー決定プレイヤーターゲットロック"
   },
   "description": {
-    "en": "Locks the target to the skill user when a player makes a decision in battle.",
-    "ja": "バトル中にプレイヤーが決定を行う際、ターゲットをスキル使用者にロックします。"
+    "en": "During the Player Decision Phase in battle, any camera that targets the Player will update to reflect the current party member being decided upon.",
+    "ja": "バトル中のプレイヤー決定フェイズ中、プレイヤーをターゲットしているカメラは、現在決定しているパーティメンバーが映るように更新されます。"
   },
   "file": "BattleViewer3D",
   "insertAfter": "turnChr[i]?.setVisibility(true);",

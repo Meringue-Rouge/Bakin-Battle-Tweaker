@@ -5,8 +5,8 @@
     "ja": "プレイヤー決定：追加カメラ"
   },
   "description": {
-    "en": "Overrides the Update function to add custom camera animations for player decisions, ally targeting, and enemy targeting.",
-    "ja": "プレイヤー決定、味方ターゲティング、敵ターゲティングのためのカスタムカメラアニメーションを追加するためにUpdate関数をオーバーライドします。"
+    "en": "Overrides the Update function to add custom camera animations for player decisions, ally targeting, and enemy targeting. This skips using the Standby camera for Player Decision.",
+    "ja": "Update関数をオーバーライドして、プレイヤーの決定、味方のターゲティング、敵のターゲティングのためのカスタムカメラアニメーションを追加します。 これにより、プレイヤー判定にスタンバイカメラを使用する必要がなくなります。"
   },
   "file": "BattleViewer3D",
   "insertAfter": "internal override void Update",

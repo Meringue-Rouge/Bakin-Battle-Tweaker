@@ -17,7 +17,8 @@ const translations = {
         paramLabels: {
             playerDec: "Player Decision (Menu)",
             allyTarget: "Ally Target (Healing/Items/Support)",
-            enemyTarget: "Enemy Target (Attack/Offense Skills)"
+            enemyTarget: "Enemy Target (Attack/Offense Skills)",
+            helpQuestion: "How do I obtain the GUID of my Custom Cameras?"
         },
         helpLink: "https://github.com/Meringue-Rouge/bakin-battle-system-snippets/blob/main/Finding%20your%20camera%20GUIDs.md"
     },
@@ -32,7 +33,8 @@ const translations = {
         paramLabels: {
             playerDec: "プレイヤー決定（メニュー）",
             allyTarget: "味方ターゲット（回復/アイテム/サポート）",
-            enemyTarget: "敵ターゲット（攻撃/攻撃スキル）"
+            enemyTarget: "敵ターゲット（攻撃/攻撃スキル）",
+            helpQuestion: "カスタムカメラのGUIDをどうやって取得しますか？"
         },
         helpLink: "https://github.com/Meringue-Rouge/bakin-battle-system-snippets/blob/main/Finding%20your%20camera%20GUIDs.md"
     }
@@ -69,7 +71,11 @@ async function loadOptionsFiles() {
         if (!response2.ok) throw new Error('Failed to load option2.json');
         const option2 = await response2.json();
 
-        options = [option0, option1, option2];
+        const response3 = await fetch('option3.json');
+        if (!response3.ok) throw new Error('Failed to load option3.json');
+        const option3 = await response3.json();
+
+        options = [option0, option1, option2, option3];
         options.forEach(opt => {
             opt.enabled = false;
             if (!opt.parameters) opt.parameters = { playerDec: '', allyTarget: '', enemyTarget: '' };
@@ -78,7 +84,7 @@ async function loadOptionsFiles() {
         rebuildModifiedCode();
     } catch (error) {
         console.error(error);
-        alert('Error loading option files. Ensure option0.json, option1.json, and option2.json are in the same directory.');
+        alert('Error loading option files. Ensure option0.json, option1.json, option2.json, and option3.json are in the same directory.');
     }
 }
 
@@ -102,18 +108,18 @@ function renderOptions() {
                     <div>${translations[currentLanguage].paramDesc}</div>
                     <div class="param-field">
                         <span class="param-label">${translations[currentLanguage].paramLabels.playerDec}:</span>
-                        <input type="text" id="param-playerDec-2" value="${opt.parameters.playerDec || ''}" placeholder="Enter GUID">
+                        <input type="text" id="param-playerDec-${index}" value="${opt.parameters.playerDec || ''}" placeholder="Enter GUID">
                     </div>
                     <div class="param-field">
                         <span class="param-label">${translations[currentLanguage].paramLabels.allyTarget}:</span>
-                        <input type="text" id="param-allyTarget-2" value="${opt.parameters.allyTarget || ''}" placeholder="Enter GUID">
+                        <input type="text" id="param-allyTarget-${index}" value="${opt.parameters.allyTarget || ''}" placeholder="Enter GUID">
                     </div>
                     <div class="param-field">
                         <span class="param-label">${translations[currentLanguage].paramLabels.enemyTarget}:</span>
-                        <input type="text" id="param-enemyTarget-2" value="${opt.parameters.enemyTarget || ''}" placeholder="Enter GUID">
+                        <input type="text" id="param-enemyTarget-${index}" value="${opt.parameters.enemyTarget || ''}" placeholder="Enter GUID">
                     </div>
                     <div class="help-link">
-                        <a href="${translations[currentLanguage].helpLink}" target="_blank">❓ ${translations[currentLanguage].helpLink}</a>
+                        <a href="${translations[currentLanguage].helpLink}" target="_blank">❓ ${translations[currentLanguage].paramLabels.helpQuestion}</a>
                     </div>
                 </div>
             `;
@@ -127,9 +133,9 @@ function renderOptions() {
         optionsDiv.appendChild(div);
 
         if (index === 2 && opt.enabled && opt.parameters) {
-            const playerDecInput = document.getElementById('param-playerDec-2');
-            const allyTargetInput = document.getElementById('param-allyTarget-2');
-            const enemyTargetInput = document.getElementById('param-enemyTarget-2');
+            const playerDecInput = document.getElementById(`param-playerDec-${index}`);
+            const allyTargetInput = document.getElementById(`param-allyTarget-${index}`);
+            const enemyTargetInput = document.getElementById(`param-enemyTarget-${index}`);
 
             if (playerDecInput) {
                 console.log('Found playerDec input');
@@ -198,11 +204,11 @@ function renderOptions() {
 // Insert code after a line or replace a function
 function insertAfterLine(code, afterLine, insertCode, emoji, optionName, isFunctionReplacement = false) {
     if (isFunctionReplacement) {
-        // Match the Update function signature and its entire body by counting braces
-        const regex = /internal\s+override\s+void\s+Update\s*\(\s*List<BattlePlayerData>\s+playerData\s*,\s*List<BattleEnemyData>\s+enemyMonsterData\s*\)\s*\{/;
+        // Match the function signature and its entire body by counting braces
+        const regex = /private\s+void\s+UpdateBattleState_SortBattleActions\s*\(\s*\)\s*\{/;
         const match = code.match(regex);
         if (!match) {
-            console.error(`Update function signature not found for ${optionName}`);
+            console.error(`UpdateBattleState_SortBattleActions function signature not found for ${optionName}`);
             return code;
         }
 
@@ -218,12 +224,12 @@ function insertAfterLine(code, afterLine, insertCode, emoji, optionName, isFunct
         }
 
         if (braceCount !== 0) {
-            console.error(`Failed to find closing brace for Update function for ${optionName}`);
+            console.error(`Failed to find closing brace for UpdateBattleState_SortBattleActions for ${optionName}`);
             return code;
         }
 
         const matchedFunction = code.substring(match.index, endIndex);
-        console.log(`Replacing Update function for ${optionName}, matched length: ${matchedFunction.length}, excerpt: ${matchedFunction.slice(0, 100)}...`);
+        console.log(`Replacing UpdateBattleState_SortBattleActions for ${optionName}, matched length: ${matchedFunction.length}, excerpt: ${matchedFunction.slice(0, 100)}...`);
 
         const indent = code.match(/^\s*/)[0] || '';
         const commentedCode = `${indent}// ${emoji} - START - ${optionName}\n${insertCode}\n${indent}// ${emoji} - END - ${optionName}`;
@@ -261,7 +267,7 @@ function rebuildModifiedCode() {
             if (opt.file === "BattleViewer3D") {
                 modifiedBattleViewer3D = insertAfterLine(modifiedBattleViewer3D, opt.insertAfter, code, opt.emoji, opt.name.en, opt.isFunctionReplacement);
             } else if (opt.file === "BattleSequenceManager") {
-                modifiedBattleSequenceManager = insertAfterLine(modifiedBattleSequenceManager, opt.insertAfter, code, opt.emoji, opt.name.en);
+                modifiedBattleSequenceManager = insertAfterLine(modifiedBattleSequenceManager, opt.insertAfter, code, opt.emoji, opt.name.en, opt.isFunctionReplacement);
             }
         }
     });

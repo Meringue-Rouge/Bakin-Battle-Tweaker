@@ -20,7 +20,10 @@ const translations = {
             enemyTarget: "Enemy Target (Attack/Offense Skills)",
             helpQuestion: "How do I obtain the GUID of my Custom Cameras?"
         },
-        helpLink: "https://github.com/Meringue-Rouge/bakin-battle-system-snippets/blob/main/Finding%20your%20camera%20GUIDs.md"
+        helpLink: "https://github.com/Meringue-Rouge/bakin-battle-system-snippets/blob/main/Finding%20your%20camera%20GUIDs.md",
+        battleSystemVersionLabel: "Tested Battle System Version:",
+        bakinVersionLabel: "Current Bakin Version:",
+        cautionMessage: "Warning: Tweaks not tested with the latest Bakin version. Use with caution."
     },
     ja: {
         pageTitle: "RPG Developer Bakin バトルシステムツイーカー",
@@ -36,7 +39,10 @@ const translations = {
             enemyTarget: "敵ターゲット（攻撃/攻撃スキル）",
             helpQuestion: "カスタムカメラのGUIDをどうやって取得しますか？"
         },
-        helpLink: "https://github.com/Meringue-Rouge/bakin-battle-system-snippets/blob/main/Finding%20your%20camera%20GUIDs.md"
+        helpLink: "https://github.com/Meringue-Rouge/bakin-battle-system-snippets/blob/main/Finding%20your%20camera%20GUIDs.md",
+        battleSystemVersionLabel: "テスト済みバトルシステムバージョン：",
+        bakinVersionLabel: "現在のBakinバージョン：",
+        cautionMessage: "警告：最新のBakinバージョンでテストされていない調整です。注意して使用してください。"
     }
 };
 
@@ -231,6 +237,14 @@ function renderOptions() {
             }
         });
     });
+
+    // Update version section translations and caution visibility
+    document.getElementById('battle-system-version-label').textContent = translations[currentLanguage].battleSystemVersionLabel;
+    document.getElementById('bakin-version-label').textContent = translations[currentLanguage].bakinVersionLabel;
+    document.getElementById('caution-message').textContent = translations[currentLanguage].cautionMessage;
+    const battleSystemVersion = document.getElementById('battle-system-version').textContent.split(' ')[0];
+    const bakinVersion = document.getElementById('bakin-version').textContent.split(' ')[0];
+    document.getElementById('version-caution').style.display = battleSystemVersion !== bakinVersion ? 'flex' : 'none';
 }
 
 // Insert code after a line or replace a function

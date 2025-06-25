@@ -48,6 +48,15 @@
             <div class="export-container">
                 <button id="export-btn" class="action-button export-button" onclick="exportCode()">Export Code</button>
             </div>
+            <div class="version-section">
+                <div class="version-label" id="battle-system-version-label">Tested Battle System Version:</div>
+                <div class="version-value" id="battle-system-version">1.14.0.3</div>
+                <div class="version-label" id="bakin-version-label">Current Bakin Version:</div>
+                <div class="version-value" id="bakin-version">1.14.0.3 <a href="https://store.steampowered.com/news/app/1036640" target="_blank">(Check updates)</a></div>
+                <div class="version-caution" id="version-caution" style="display: none;">
+                    ⚠️ <span id="caution-message">Warning: Tweaks not tested with the latest Bakin version. Use with caution.</span>
+                </div>
+            </div>
             <div class="config-buttons">
                 <button id="save-btn" class="action-button config-button" onclick="saveOptions()">Save Options</button>
                 <button id="load-btn" class="action-button config-button" onclick="loadOptions()">Load Options</button>

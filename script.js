@@ -320,9 +320,10 @@ function rebuildModifiedCode() {
         if (opt.enabled) {
             let code = opt.code;
             if (opt.parameters) {
-                code = code.replace("/* PLAYER DEC */", opt.parameters.playerDec || "5f73a3bc-830a-404b-afa1-87a2f4eaf2f0")
-                          .replace("/* ALLY TARGET */", opt.parameters.allyTarget || "6ff8c4a2-a1f1-4d4e-86d9-5078e0d2cff6")
-                          .replace("/* ENEMY TARGET */", opt.parameters.enemyTarget || "01ab9f24-6b93-4440-9b5a-4f91e0f556b8");
+                // Use global regex to replace placeholder content inside quotes
+                code = code.replace(/\/\* PLAYER DEC \*\//g, opt.parameters.playerDec || '5f73a3bc-830a-404b-afa1-87a2f4eaf2f0')
+                          .replace(/\/\* ALLY TARGET \*\//g, opt.parameters.allyTarget || '6ff8c4a2-a1f1-4d4e-86d9-5078e0d2cff6')
+                          .replace(/\/\* ENEMY TARGET \*\//g, opt.parameters.enemyTarget || '01ab9f24-6b93-4440-9b5a-4f91e0f556b8');
             }
             if (opt.file === "BattleViewer3D") {
                 modifiedBattleViewer3D = insertAfterLine(modifiedBattleViewer3D, opt.insertAfter, code, opt.emoji, opt.name.en, opt.isFunctionReplacement);

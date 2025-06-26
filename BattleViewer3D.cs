@@ -137,7 +137,7 @@ namespace Yukar.Battle
                 particleView.enableDof(false);
 
                 particleViewTexture = particleView.getCaptureColorTexture();
-                GameMain.instance.gameView.addSubGameView(particleView);
+                GameMain.instance.gameView.addSubGameView(particleView, SharpKmyGfx.SubGameViewDrawTrigger.OnDemand);
             }
 
             private LayoutDrawerController LoadLayout(Rom.LayoutProperties.LayoutNode.UsageInGame usageInGame)
@@ -253,6 +253,8 @@ namespace Yukar.Battle
                                 if (item == null)
                                     continue;
 
+                                // 本当は LevelUp をチェックしたいが、Position[0][0] で組まれているレイアウトがあるので、PositionAnchorTag が空でないものをチェックする
+                                // I actually want to check LevelUp, but since there is a layout built with Position[0][0], check if PositionAnchorTag is not empty
                                 if (!string.IsNullOrEmpty(item.positionAnchorTag))
                                 {
                                     // #12657 リザルトのレベルアップ表示などを確実に非表示化する(これがないとコンテナのアニメが勝手に表示状態に戻してしまう)
@@ -1125,23 +1127,6 @@ namespace Yukar.Battle
                     return res;
                 }
 
-                if (System.Text.RegularExpressions.Regex.IsMatch(tag, "\\\\Position\\[[0-9]+\\]\\[[0-9]+\\]", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
-                {
-                    var match = System.Text.RegularExpressions.Regex.Match(tag, "\\\\Position\\[[0-9]+\\]\\[[0-9]+\\]", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-                    match = System.Text.RegularExpressions.Regex.Match(match.Value, "\\[[0-9]+\\]\\[[0-9]+\\]", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-                    var indeices = match.Value.Replace("[", string.Empty).Split(']');
-
-                    var x = 0;
-                    var y = 0;
-                    if (indeices.Length > 2)
-                    {
-                        x = Convert.ToInt32(indeices[0]);
-                        y = Convert.ToInt32(indeices[1]);
-                    }
-
-                    res = new Vector2(x, y);
-                }
-
                 return null;
             });
 
@@ -1294,6 +1279,8 @@ namespace Yukar.Battle
                     }
                 }
 
+                // Position[0][0] 互換用
+                // Position[0][0] For compatibility
                 if (System.Text.RegularExpressions.Regex.IsMatch(tag, "Position\\[[0-9]+\\]\\[[0-9]+\\]", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
                 {
                     var match = System.Text.RegularExpressions.Regex.Match(tag, "Position\\[[0-9]+\\]\\[[0-9]+\\]", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
@@ -1309,6 +1296,13 @@ namespace Yukar.Battle
                     }
 
                     res = new Vector2(x, y);
+                }
+
+                // Position[0][0] の代替
+                // Alternatives for Position[0][0]
+                if (tag == "LevelUp")
+                {
+                    res = new Vector2(0, 0);
                 }
 
                 return res;

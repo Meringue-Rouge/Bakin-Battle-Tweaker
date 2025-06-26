@@ -7586,6 +7586,7 @@ namespace Yukar.Battle
                     itemSelectWindowDrawer.FooterTitleText = "";
                     itemSelectWindowDrawer.FooterSubDescriptionText = "";
 
+#if false// #18621 様子見中[20250521] / #18621 Waiting and watching [20250521]
                     commandSelectPlayer.haveItemList.Clear();
                     itemSelectWindowDrawer.ClearChoiceListData();
 
@@ -7626,7 +7627,9 @@ namespace Yukar.Battle
                             itemSelectWindowDrawer.AddChoiceData(itemData.item.name, itemCount, itemData.item, useableItem);
                         }
                     }
-
+#else
+                    UpdateItemSelectWindowDrawer();
+#endif
                     battleViewer.OpenWindow(WindowType.ItemListWindow);
                     battleCommandState = SelectBattleCommandState.Item_SelectItem;
                     break;
@@ -9161,6 +9164,81 @@ namespace Yukar.Battle
         public override MapScene GetEventController()
         {
             return battleEvents;
+        }
+
+        // battleViewer.itemSelectWindowDrawer.GetChoicesData()の返り値部分のみ
+        // battleViewer.itemSelectWindowDrawer.GetChoicesData() return part only
+        // commandSelectPlayerはnullの場合もある
+        // commandSelectPlayer can be null
+        public void UpdateItemSelectWindowDrawer()
+        {
+            var itemSelectWindowDrawer = battleViewer.itemSelectWindowDrawer;
+
+        //  if (commandSelectPlayer != null)
+        //  {
+        //      var guid = commandSelectPlayer.selectedBattleCommand.refGuid;
+        //      Viewer.ui.itemList = layoutDic.ContainsKey(guid) ? layoutDic[guid] : null;
+        //  }
+        //  else
+        //  {
+        //      Viewer.ui.itemList = null;  // defaultItemList
+        //  }
+
+            var haveItemList = new List<Party.ItemStack>();
+
+            commandSelectPlayer?.haveItemList.Clear();
+            itemSelectWindowDrawer.ClearChoiceListData();
+
+            var expendableItems = party.Items.Where(itemData => itemData.item.IsExpandable && !itemData.item.IsExpandableWithSkill && itemData.item.expendable.availableInBattle);
+            var skillItems = party.Items.Where(itemData => itemData.item.IsExpandableWithSkill && itemData.item.expendableWithSkill.availableInBattle);
+            var usableItems = expendableItems.Union(skillItems);
+
+            var filterTagProperties = Viewer.ui.itemList.FilterTagProperties;
+
+            if ((filterTagProperties?.Count ?? 0) == 0)
+            {
+                haveItemList.AddRange(usableItems);
+            }
+            else
+            {
+                haveItemList.AddRange(usableItems.Where(x => ItemFilter.FilterItem(owner, x.item, filterTagProperties)));
+            }
+
+            foreach (var itemData in haveItemList)
+            {
+                int itemCount = itemData.num;
+
+                if (itemData.item.IsExpandable)
+                {
+                    // 既にアイテムを使おうとしているメンバーがいたらその分だけ個数を減らす
+                    // If there are members already trying to use the item, reduce the number accordingly.
+                    if (commandSelectPlayer != null)
+                    {
+                        itemCount -= (playerData.Count(player => (player != commandSelectPlayer && player.selectedBattleCommandType == BattleCommandType.Item) && (player.selectedItem.item == itemData.item)));
+                    }
+                }
+
+                bool useableItem = (itemCount > 0);
+
+                if (iconTable.ContainsKey(itemData.item.icon.guId))
+                {
+                    itemSelectWindowDrawer.AddChoiceData(
+                            iconTable[itemData.item.icon.guId], itemData.item.icon, 
+                            itemData.item.name, itemCount, itemData.item.description,
+                            itemData.item, useableItem);
+                }
+                else
+                {
+                    itemSelectWindowDrawer.AddChoiceData(
+                            itemData.item.name, itemCount, itemData.item.description,
+                            itemData.item, useableItem);
+                }
+            }
+
+            if (commandSelectPlayer != null)
+            {
+                commandSelectPlayer.haveItemList = haveItemList;
+            }
         }
     }
 }

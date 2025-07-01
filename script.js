@@ -13,11 +13,13 @@ const translations = {
         loadBtn: "Load Options",
         resetBtn: "Reset to Default",
         paramTitle: "Important Settings Required",
-        paramDesc: "Please add the GUID for the three camera types.",
+        paramDesc: "Please add the values for the parameters below.",
         paramLabels: {
             playerDec: "Player Decision (Menu)",
             allyTarget: "Ally Target (Healing/Items/Support)",
             enemyTarget: "Enemy Target (Attack/Offense Skills)",
+            playerDampening: "Player Stat Dampening",
+            enemyDampening: "Enemy Stat Dampening",
             helpQuestion: "How do I obtain the GUID of my Custom Cameras?"
         },
         helpLink: "https://github.com/Meringue-Rouge/bakin-battle-system-snippets/blob/main/Finding%20your%20camera%20GUIDs.md",
@@ -32,11 +34,13 @@ const translations = {
         loadBtn: "オプションを読み込み",
         resetBtn: "デフォルトにリセット",
         paramTitle: "重要な設定が必要です",
-        paramDesc: "3つのカメラタイプのGUIDを追加してください。",
+        paramDesc: "以下の値の設定をしてください。",
         paramLabels: {
             playerDec: "プレイヤー決定（メニュー）",
             allyTarget: "味方ターゲット（回復/アイテム/サポート）",
             enemyTarget: "敵ターゲット（攻撃/攻撃スキル）",
+            playerDampening: "プレイヤーステータス減衰率",
+            enemyDampening: "敵ステータス減衰率",
             helpQuestion: "カスタムカメラのGUIDをどうやって取得しますか？"
         },
         helpLink: "https://github.com/Meringue-Rouge/bakin-battle-system-snippets/blob/main/Finding%20your%20camera%20GUIDs.md",
@@ -65,64 +69,19 @@ async function loadOriginalFiles() {
 // Load option JSON files
 async function loadOptionsFiles() {
     try {
-        const response0 = await fetch('option0.json');
-        if (!response0.ok) throw new Error('Failed to load option0.json');
-        const option0 = await response0.json();
-
-        const response1 = await fetch('option1.json');
-        if (!response1.ok) throw new Error('Failed to load option1.json');
-        const option1 = await response1.json();
-
-        const response2 = await fetch('option2.json');
-        if (!response2.ok) throw new Error('Failed to load option2.json');
-        const option2 = await response2.json();
-
-        const response3 = await fetch('option3.json');
-        if (!response3.ok) throw new Error('Failed to load option3.json');
-        const option3 = await response3.json();
-
-        const response4 = await fetch('option4.json');
-        if (!response4.ok) throw new Error('Failed to load option4.json');
-        const option4 = await response4.json();
-
-        const response5 = await fetch('option5.json');
-        if (!response5.ok) throw new Error('Failed to load option5.json');
-        const option5 = await response5.json();
-
-        const response6 = await fetch('option6.json');
-        if (!response6.ok) throw new Error('Failed to load option6.json');
-        const option6 = await response6.json();
-
-        const response7 = await fetch('option7.json');
-        if (!response7.ok) throw new Error('Failed to load option7.json');
-        const option7 = await response7.json();
-
-        const response8 = await fetch('option8.json');
-        if (!response8.ok) throw new Error('Failed to load option8.json');
-        const option8 = await response8.json();
-
-        const response9 = await fetch('option9.json');
-        if (!response9.ok) throw new Error('Failed to load option9.json');
-        const option9 = await response9.json();
-
-        const response10 = await fetch('option10.json');
-        if (!response10.ok) throw new Error('Failed to load option10.json');
-        const option10 = await response10.json();
-
-        const response11 = await fetch('option11.json');
-        if (!response11.ok) throw new Error('Failed to load option11.json');
-        const option11 = await response11.json();
-
-        options = [option0, option1, option2, option3, option4, option5, option6, option7, option8, option9, option10, option11];
-        options.forEach(opt => {
-            opt.enabled = false;
-            if (!opt.parameters) opt.parameters = null;
-        });
+        for (let i = 0; i <= 12; i++) {
+            const response = await fetch(`option${i}.json`);
+            if (!response.ok) throw new Error(`Failed to load option${i}.json`);
+            const option = await response.json();
+            options[i] = option;
+            option.enabled = false;
+            if (!option.parameters) option.parameters = null;
+        }
         renderOptions();
         rebuildModifiedCode();
     } catch (error) {
         console.error(error);
-        alert('Error loading option files. Ensure all option files (option0.json to option11.json) are in the same directory.');
+        alert('Error loading option files. Ensure all option files (option0.json to option12.json) are in the same directory.');
     }
 }
 
@@ -138,12 +97,11 @@ function renderOptions() {
         const div = document.createElement('div');
         div.className = `option ${opt.enabled && index === 1 && options[2].enabled ? 'disabled-option' : ''}`;
         let paramHtml = '';
-        if (index === 2 && opt.enabled && opt.parameters) {
-            console.log(`Rendering parameters for option 2: ${opt.name.en}, parameters: ${JSON.stringify(opt.parameters)}`);
-            paramHtml = `
-                <div class="parameters" id="params-2">
-                    <div><strong>⚠️ ${translations[currentLanguage].paramTitle}</strong></div>
-                    <div>${translations[currentLanguage].paramDesc}</div>
+        if ((index === 2 || index === 12) && opt.enabled && opt.parameters) {
+            console.log(`Rendering parameters for option ${index}: ${opt.name.en}, parameters: ${JSON.stringify(opt.parameters)}`);
+            paramHtml = `<div class="parameters" id="params-${index}"><div><strong>⚠️ ${translations[currentLanguage].paramTitle}</strong></div><div>${translations[currentLanguage].paramDesc}</div>`;
+            if (index === 2) {
+                paramHtml += `
                     <div class="param-field">
                         <span class="param-label">${translations[currentLanguage].paramLabels.playerDec}:</span>
                         <input type="text" id="param-playerDec-${index}" value="${opt.parameters.playerDec || ''}" placeholder="Enter GUID">
@@ -158,9 +116,19 @@ function renderOptions() {
                     </div>
                     <div class="help-link">
                         <a href="${translations[currentLanguage].helpLink}" target="_blank">❓ ${translations[currentLanguage].paramLabels.helpQuestion}</a>
+                    </div>`;
+            } else if (index === 12) {
+                paramHtml += `
+                    <div class="param-field">
+                        <span class="param-label">${translations[currentLanguage].paramLabels.playerDampening}:</span>
+                        <input type="number" step="0.1" min="0" max="1" id="param-playerDampening-${index}" value="${opt.parameters.playerDampening || '0.8'}">
                     </div>
-                </div>
-            `;
+                    <div class="param-field">
+                        <span class="param-label">${translations[currentLanguage].paramLabels.enemyDampening}:</span>
+                        <input type="number" step="0.1" min="0" max="1" id="param-enemyDampening-${index}" value="${opt.parameters.enemyDampening || '0.8'}">
+                    </div>`;
+            }
+            paramHtml += `</div>`;
         }
         div.innerHTML = `
             <label><input type="checkbox" id="option-${index}" ${opt.enabled ? 'checked' : ''} ${index === 1 && options[2].enabled ? 'disabled checked' : ''}> 
@@ -170,44 +138,36 @@ function renderOptions() {
         `;
         optionsDiv.appendChild(div);
 
-        if (index === 2 && opt.enabled && opt.parameters) {
-            const playerDecInput = document.getElementById(`param-playerDec-${index}`);
-            const allyTargetInput = document.getElementById(`param-allyTarget-${index}`);
-            const enemyTargetInput = document.getElementById(`param-enemyTarget-${index}`);
+        if ((index === 2 || index === 12) && opt.enabled && opt.parameters) {
+            if (index === 2) {
+                const playerDecInput = document.getElementById(`param-playerDec-${index}`);
+                const allyTargetInput = document.getElementById(`param-allyTarget-${index}`);
+                const enemyTargetInput = document.getElementById(`param-enemyTarget-${index}`);
 
-            if (playerDecInput) {
-                console.log('Found playerDec input');
-                playerDecInput.addEventListener('input', (e) => {
+                playerDecInput?.addEventListener('input', (e) => {
                     opt.parameters.playerDec = e.target.value;
                     rebuildModifiedCode();
                 });
-            } else {
-                console.error('PlayerDec input not found');
-            }
-            if (allyTargetInput) {
-                console.log('Found allyTarget input');
-                allyTargetInput.addEventListener('input', (e) => {
+                allyTargetInput?.addEventListener('input', (e) => {
                     opt.parameters.allyTarget = e.target.value;
                     rebuildModifiedCode();
                 });
-            } else {
-                console.error('AllyTarget input not found');
-            }
-            if (enemyTargetInput) {
-                console.log('Found enemyTarget input');
-                enemyTargetInput.addEventListener('input', (e) => {
+                enemyTargetInput?.addEventListener('input', (e) => {
                     opt.parameters.enemyTarget = e.target.value;
                     rebuildModifiedCode();
                 });
-            } else {
-                console.error('EnemyTarget input not found');
-            }
+            } else if (index === 12) {
+                const playerDampeningInput = document.getElementById(`param-playerDampening-${index}`);
+                const enemyDampeningInput = document.getElementById(`param-enemyDampening-${index}`);
 
-            const paramsDiv = document.getElementById('params-2');
-            if (paramsDiv) {
-                console.log(`Params div found for option 2, computed display: ${getComputedStyle(paramsDiv).display}`);
-            } else {
-                console.error('Params div not found for option 2');
+                playerDampeningInput?.addEventListener('input', (e) => {
+                    opt.parameters.playerDampening = parseFloat(e.target.value) || 0.8;
+                    rebuildModifiedCode();
+                });
+                enemyDampeningInput?.addEventListener('input', (e) => {
+                    opt.parameters.enemyDampening = parseFloat(e.target.value) || 0.8;
+                    rebuildModifiedCode();
+                });
             }
         }
 
@@ -220,17 +180,8 @@ function renderOptions() {
             renderOptions();
             rebuildModifiedCode();
             console.log(`Checkbox changed for option ${index}, enabled: ${options[index].enabled}`);
-            const paramsDiv = document.getElementById('params-2');
-            if (index === 2) {
-                if (paramsDiv) {
-                    console.log(`Params div found after render, computed display: ${getComputedStyle(paramsDiv).display}`);
-                } else {
-                    console.error('Params div not found after render');
-                }
-            }
         });
 
-        // Allow clicking anywhere on the option to toggle the checkbox
         div.addEventListener('click', (e) => {
             if (e.target.tagName !== 'INPUT' && !div.classList.contains('disabled-option')) {
                 checkbox.click();
@@ -238,7 +189,7 @@ function renderOptions() {
         });
     });
 
-    // Update version section translations and caution visibility
+    // Update version section
     document.getElementById('battle-system-version-label').textContent = translations[currentLanguage].battleSystemVersionLabel;
     document.getElementById('bakin-version-label').textContent = translations[currentLanguage].bakinVersionLabel;
     document.getElementById('caution-message').textContent = translations[currentLanguage].cautionMessage;
@@ -250,8 +201,8 @@ function renderOptions() {
 // Insert code after a line or replace a function
 function insertAfterLine(code, afterLine, insertCode, emoji, optionName, isFunctionReplacement = false) {
     if (isFunctionReplacement) {
-        // Match the function signature and its entire body by counting braces
-        const regex = /(private\s+void\s+UpdateBattleState_SortBattleActions\s*\(\s*\)\s*\{)|(internal\s+override\s+void\s+Update\s*\(\s*List<BattlePlayerData>\s+playerData\s*,\s*List<BattleEnemyData>\s+enemyMonsterData\s*\)\s*\{)/;
+        // Match the function signature
+        const regex = new RegExp(`(${afterLine.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\s*\\{)`);
         const match = code.match(regex);
         if (!match) {
             console.error(`Function signature not found for ${optionName}`);
@@ -262,7 +213,6 @@ function insertAfterLine(code, afterLine, insertCode, emoji, optionName, isFunct
         let braceCount = 1;
         let endIndex = startIndex;
 
-        // Count braces to find the closing brace of the function
         while (braceCount > 0 && endIndex < code.length) {
             if (code[endIndex] === '{') braceCount++;
             else if (code[endIndex] === '}') braceCount--;
@@ -273,9 +223,6 @@ function insertAfterLine(code, afterLine, insertCode, emoji, optionName, isFunct
             console.error(`Failed to find closing brace for function for ${optionName}`);
             return code;
         }
-
-        const matchedFunction = code.substring(match.index, endIndex);
-        console.log(`Replacing function for ${optionName}, matched length: ${matchedFunction.length}, excerpt: ${matchedFunction.slice(0, 100)}...`);
 
         const indent = code.match(/^\s*/)[0] || '';
         const commentedCode = `${indent}// ${emoji} - START - ${optionName}\n${insertCode}\n${indent}// ${emoji} - END - ${optionName}`;
@@ -291,7 +238,6 @@ function insertAfterLine(code, afterLine, insertCode, emoji, optionName, isFunct
             const line = lines[i].trim();
             newLines.push(lines[i]);
 
-            // Detect switch case start
             if (line.startsWith('case BattleCommandType.')) {
                 inSwitchCase = true;
                 switchCaseName = line.match(/case BattleCommandType\.(\w+)/)[1];
@@ -301,7 +247,6 @@ function insertAfterLine(code, afterLine, insertCode, emoji, optionName, isFunct
                 switchCaseName = '';
             }
 
-            // Check if the current line contains restoreCamera and matches the option's switch case
             if (line.includes('restoreCamera') && foundSwitch && optionName.includes(switchCaseName)) {
                 const indent = lines[i].match(/^\s*/)[0];
                 newLines[i] = `${indent}// ${emoji} - ${optionName}: Disabled restoreCamera\n${indent}// ${lines[i].trim()}`;
@@ -320,10 +265,16 @@ function rebuildModifiedCode() {
         if (opt.enabled) {
             let code = opt.code;
             if (opt.parameters) {
-                // Use global regex to replace placeholder content inside quotes
-                code = code.replace(/\/\* PLAYER DEC \*\//g, opt.parameters.playerDec || '5f73a3bc-830a-404b-afa1-87a2f4eaf2f0')
-                          .replace(/\/\* ALLY TARGET \*\//g, opt.parameters.allyTarget || '6ff8c4a2-a1f1-4d4e-86d9-5078e0d2cff6')
-                          .replace(/\/\* ENEMY TARGET \*\//g, opt.parameters.enemyTarget || '01ab9f24-6b93-4440-9b5a-4f91e0f556b8');
+                if (index === 2) {
+                    // Handle option 2 (camera GUIDs)
+                    code = code.replace(/\/\* PLAYER DEC \*\//g, opt.parameters.playerDec || '5f73a3bc-830a-404b-afa1-87a2f4eaf2f0')
+                              .replace(/\/\* ALLY TARGET \*\//g, opt.parameters.allyTarget || '6ff8c4a2-a1f1-4d4e-86d9-5078e0d2cff6')
+                              .replace(/\/\* ENEMY TARGET \*\//g, opt.parameters.enemyTarget || '01ab9f24-6b93-4440-9b5a-4f91e0f556b8');
+                } else if (index === 12) {
+                    // Handle option 12 (dampening rates)
+                    code = code.replace(/\/\* PLAYER DAMPENING \*\//g, `${opt.parameters.playerDampening || 0.8}f`)
+                              .replace(/\/\* ENEMY DAMPENING \*\//g, `${opt.parameters.enemyDampening || 0.8}f`);
+                }
             }
             if (opt.file === "BattleViewer3D") {
                 modifiedBattleViewer3D = insertAfterLine(modifiedBattleViewer3D, opt.insertAfter, code, opt.emoji, opt.name.en, opt.isFunctionReplacement);
@@ -355,39 +306,41 @@ function saveOptions() {
         parameters: opt.parameters || null
     }));
     localStorage.setItem('optionsState', JSON.stringify(state));
-    alert(currentLanguage === 'en' ? 'Options saved successfully!' : 'オプションが保存されました！');
+    alert(translations[currentLanguage].saveBtn === 'Save Options' ? 'Options saved successfully!' : 'オプションが保存されました！');
 }
 
-// Load options from local storage
+// Load options state
 function loadOptions() {
     const state = JSON.parse(localStorage.getItem('optionsState'));
     if (state) {
         state.forEach((optState, index) => {
             options[index].enabled = optState.enabled;
-            if (optState.parameters) {
-                options[index].parameters = optState.parameters;
-            }
+            if (optState.parameters) options[index].parameters = optState.parameters;
         });
         renderOptions();
         rebuildModifiedCode();
-        alert(currentLanguage === 'en' ? 'Options loaded successfully!' : 'オプションが読み込まれました！');
+        alert(translations[currentLanguage].loadBtn === 'Load Options' ? 'Options loaded successfully!' : 'オプションが読みされました！');
     } else {
-        alert(currentLanguage === 'en' ? 'No saved options found.' : '保存されたオプションが見つかりません。');
+        alert(translations[currentLanguage].loadBtn === 'Load Options' ? 'No saved options found!' : '保存されたオプションが見つかりません！');
     }
 }
 
-// Reset options to default
+// Reset to default
 function resetToDefault() {
     options.forEach((opt, index) => {
         opt.enabled = false;
         if (opt.parameters) {
-            opt.parameters = { playerDec: '', allyTarget: '', enemyTarget: '' };
+            if (index === 2) {
+                opt.parameters = { playerDec: '', allyTarget: '', enemyTarget: '' };
+            } else if (index === 12) {
+                opt.parameters = { playerDampening: 0.8, enemyDampening: 0.8 };
+            }
         }
         document.getElementById(`option-${index}`)?.removeAttribute('checked');
     });
     renderOptions();
     rebuildModifiedCode();
-    alert(currentLanguage === 'en' ? 'Options reset to default.' : 'オプションがデフォルトにリセットされました。');
+    alert(translations[currentLanguage].resetBtn === 'Reset to Default' ? 'Options reset to default!' : 'オプションがデフォルトにリセットされました！');
 }
 
 // Switch language
@@ -401,7 +354,7 @@ function switchLanguage() {
     renderOptions();
 }
 
-// Initialize on page load
+// Initialize
 window.onload = async () => {
     await loadOriginalFiles();
     await loadOptionsFiles();

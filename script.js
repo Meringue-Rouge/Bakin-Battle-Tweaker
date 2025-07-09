@@ -201,8 +201,8 @@ function renderOptions() {
 // Insert code after a line or replace a function
 function insertAfterLine(code, afterLine, insertCode, emoji, optionName, isFunctionReplacement = false) {
     if (isFunctionReplacement) {
-        // Match the function signature
-        const regex = new RegExp(`(${afterLine.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\s*\\{)`);
+        // Match the function signature, allowing for whitespace and newlines before the opening brace
+        const regex = new RegExp(`(${afterLine.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\s*\\([^)]*\\))\\s*\\{`);
         const match = code.match(regex);
         if (!match) {
             console.error(`Function signature not found for ${optionName}`);

@@ -747,14 +747,14 @@ namespace Yukar.Battle
                 //data.SetParameters(monster);
                 var cast = Party.createHeroFromRom(catalog, owner.data.party, monster, 1, true);
                 data.SetParameters(cast, party.getHeroName(monster.guId));
-            }
-            else
+			}
+			else
             {
                 var cast = Party.createHeroFromRom(catalog, owner.data.party, monster, level, true);
                 data.SetParameters(cast, party.getHeroName(monster.guId));
             }
 
-            data.battleStatusData.statusValue.InitializeStatus(data.baseStatusValue);
+			data.battleStatusData.statusValue.InitializeStatus(data.baseStatusValue);
             data.battleStatusData.consumptionStatusValue.InitializeStatus(data.consumptionStatusValue);
             data.startStatusData.statusValue.InitializeStatus(data.baseStatusValue);
             data.startStatusData.consumptionStatusValue.InitializeStatus(data.consumptionStatusValue);
@@ -764,7 +764,11 @@ namespace Yukar.Battle
             data.battleStatusData.HitPoint = data.startStatusData.HitPoint = data.nextStatusData.HitPoint = data.HitPoint;
             data.battleStatusData.MagicPoint = data.startStatusData.MagicPoint = data.nextStatusData.MagicPoint = data.MagicPoint;
 
-            return data;
+			// 装備時効果での状態付与の初期化
+			// Initialize state granting with equipment effect
+			data.InitializeEquipmentAttachCondition(catalog, battleEvents);
+
+			return data;
         }
 
         public int SearchIndex(BattleCharacterBase self)

@@ -9,7 +9,7 @@
     "ja": "毎ターン開始時に状態異常によるステータス変化の減衰率を調整します。Bakinのデフォルトは0.8で、状態異常のボーナスは毎ターン20%減少します。1に設定するとステータス変化が毎ターン変わりません。"
   },
   "file": "BattleSequenceManager",
-  "insertAfter": "private void UpdateBattleState_PlayerTurnStart()",
+  "insertAfter": "private void UpdateBattleState_PlayerTurnStart",
   "isFunctionReplacement": true,
   "parameters": {
     "playerDampening": 0.8,

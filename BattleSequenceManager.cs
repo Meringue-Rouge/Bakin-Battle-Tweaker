@@ -7186,27 +7186,24 @@ namespace Yukar.Battle
                         {
                             var skill = catalog.getItemFromGuid(chr.selectedBattleCommand.refGuid) as Rom.NSkill;
 
-                            isFriendRecoveryDownStatus = (skill.friendEffect != null && skill.friendEffect.HasDeadCondition(catalog) && skill.option.onlyForDown);
+                            isFriendRecoveryDownStatus = CheckSkillFriendRecoveryDownStatus(skill);
                         }
                         break;
 
                     case BattleCommandType.Skill:
-                        isFriendRecoveryDownStatus = (
-                            chr.selectedSkill.friendEffect != null &&
-                            chr.selectedSkill.friendEffect.HasDeadCondition(catalog) &&
-                            chr.selectedSkill.option.onlyForDown);
+                        isFriendRecoveryDownStatus = CheckSkillFriendRecoveryDownStatus(chr.selectedSkill);
                         break;
 
                     case BattleCommandType.Item:
-                        if (chr.selectedItem.item.expendable != null)
-                        {
-                            isFriendRecoveryDownStatus = chr.selectedItem.item.expendable.HasRecoveryDeadCondition(catalog);
-                        }
-                        else if (chr.selectedItem.item.expendableWithSkill != null)
+                        if ((chr.selectedItem.item.expendableWithSkill?.skill ?? Guid.Empty) != Guid.Empty)
                         {
                             var skill = catalog.getItemFromGuid(chr.selectedItem.item.expendableWithSkill.skill) as Common.Rom.NSkill;
 
-                            isFriendRecoveryDownStatus = (skill.friendEffect != null && skill.friendEffect.HasDeadCondition(catalog) && skill.option.onlyForDown);
+                            isFriendRecoveryDownStatus = CheckSkillFriendRecoveryDownStatus(skill);
+                        }
+                        else if (chr.selectedItem.item.expendable != null)
+                        {
+                            isFriendRecoveryDownStatus = chr.selectedItem.item.expendable.HasRecoveryDeadCondition(catalog);
                         }
                         break;
                     case BattleCommandType.Position:
@@ -7223,6 +7220,13 @@ namespace Yukar.Battle
             }
 
             return true;
+        }
+
+        private bool CheckSkillFriendRecoveryDownStatus(Rom.NSkill skill)
+        {
+            return skill.friendEffect != null &&
+                   skill.friendEffect.HasDeadCondition(catalog) &&
+                   skill.option.onlyForDown;
         }
 
         private void UpdateCommandSelect()
@@ -8675,62 +8679,7 @@ namespace Yukar.Battle
                     {
                         var skill = catalog.getItemFromGuid(character.selectedBattleCommand.refGuid) as Rom.NSkill;
 
-                        switch (skill.option.target)
-                        {
-                            case Rom.TargetType.ENEMY_ONE:
-                            case Rom.TargetType.PARTY_ALL_ENEMY_ONE:
-                            case Rom.TargetType.SELF_ENEMY_ONE:
-                            case Rom.TargetType.OTHERS_ENEMY_ONE:
-                                if (skill.enemyEffect != null)
-                                {
-                                    if (IsNotActiveTarget(target) || target.IsDeadCondition())
-                                    {
-                                        GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : Target is Already Extinct.");
-                                        isRetarget = true;
-                                    }
-                                    else if(!IsHitRange(character, skill.Range, target))
-                                    {
-                                        GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : Target is So Far.");
-                                        isRetarget = true;
-                                    }
-                                }
-                                break;
-
-                            case Rom.TargetType.PARTY_ONE:
-                            case Rom.TargetType.PARTY_ONE_ENEMY_ALL:
-                                if (skill.friendEffect != null)
-                                {
-                                    if (IsNotActiveTarget(target))
-                                    {
-                                        GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : Target is Already Extinct.");
-                                        isRetarget = true;
-                                    }
-                                    else if (!IsHitRange(character, skill.Range, target))
-                                    {
-                                        GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : Target is So Far.");
-                                        isRetarget = true;
-                                    }
-                                    // 蘇生効果ありで対象が死んでいないか戦闘不能者のみの場合は無効
-                                    // Invalid if there is a resurrection effect and the target is not dead or only incapacitated
-                                    else if (skill.friendEffect.HasDeadCondition(catalog))
-                                    {
-                                        if (!target.IsDeadCondition() && skill.IsOnlyForDown(catalog))
-                                        {
-                                            GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : Target is Alive.");
-                                            isRetarget = true;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (target.IsDeadCondition())
-                                        {
-                                            GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : Target is Dead.");
-                                            isRetarget = true;
-                                        }
-                                    }
-                                }
-                                break;
-                        }
+                        isRetarget = CheckSkillTargetAvailable(skill, character, target);
                     }
                     break;
 
@@ -8739,102 +8688,18 @@ namespace Yukar.Battle
                     {
                         var skill = character.selectedSkill;
 
-                        switch (skill.option.target)
-                        {
-                            case Rom.TargetType.ENEMY_ONE:
-                            case Rom.TargetType.PARTY_ALL_ENEMY_ONE:
-                            case Rom.TargetType.SELF_ENEMY_ONE:
-                            case Rom.TargetType.OTHERS_ENEMY_ONE:
-                                if (skill.enemyEffect != null)
-                                {
-                                    if (IsNotActiveTarget(target) || target.IsDeadCondition())
-                                    {
-                                        GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : Target is Already Extinct.");
-                                        isRetarget = true;
-                                    }
-                                    else if(character.EnemyPartyRefMember.Exists(x => x.HateCondition != 0))
-                                    {
-                                        GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : To Apply Hate Condition.");
-                                        isRetarget = true;
-                                    }
-                                    else if(!IsHitRange(character, skill.Range, target))
-                                    {
-                                        GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : Target is So Far.");
-                                        isRetarget = true;
-                                    }
-                                }
-                                break;
-
-                            case Rom.TargetType.PARTY_ONE:
-                            case Rom.TargetType.PARTY_ONE_ENEMY_ALL:
-                                if (skill.friendEffect != null)
-                                {
-                                    if (IsNotActiveTarget(target))
-                                    {
-                                        GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : Target is Already Extinct.");
-                                        isRetarget = true;
-                                    }
-                                    else if(!IsHitRange(character, skill.Range, target))
-                                    {
-                                        GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : Target is So Far.");
-                                        isRetarget = true;
-                                    }
-                                    // 蘇生効果ありで対象が死んでいないか戦闘不能者のみの場合は無効
-                                    // Invalid if there is a resurrection effect and the target is not dead or only incapacitated
-                                    else if (skill.friendEffect.HasDeadCondition(catalog))
-                                    {
-                                        if (!target.IsDeadCondition() && skill.IsOnlyForDown(catalog))
-                                        {
-                                            GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : Target is Alive.");
-                                            isRetarget = true;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (target.IsDeadCondition())
-                                        {
-                                            GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : Target is Dead.");
-                                            isRetarget = true;
-                                        }
-                                    }
-                                }
-                                break;
-                        }
+                        isRetarget = CheckSkillTargetAvailable(skill, character, target);
                     }
                     break;
 
                 case BattleCommandType.Item:
                     foreach (var target in character.targetCharacter)
                     {
-                        if (character.selectedItem.item.expendableWithSkill != null)
+                        if ((character.selectedItem.item.expendableWithSkill?.skill ?? Guid.Empty) != Guid.Empty)
                         {
                             var skill = catalog.getItemFromGuid(character.selectedItem.item.expendableWithSkill.skill) as Common.Rom.NSkill;
 
-                            if (skill != null)
-                            {
-                                switch (skill.option.target)
-                                {
-                                    case Rom.TargetType.PARTY_ONE:
-                                    case Rom.TargetType.PARTY_ONE_ENEMY_ALL:
-                                        if (IsNotActiveTarget(target) || target == null || !IsHitRange(character, skill.Range, target) || (skill.friendEffect != null
-                                            && ((target.IsDeadCondition() != skill.friendEffect.HasDeadCondition(catalog)) && skill.IsOnlyForDown(catalog))))
-                                        {
-                                            GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : Target is Not Available.");
-                                            isRetarget = true;
-                                        }
-                                        break;
-
-                                    case Rom.TargetType.ENEMY_ONE:
-                                    case Rom.TargetType.PARTY_ALL_ENEMY_ONE:
-                                    case Rom.TargetType.SELF_ENEMY_ONE:
-                                        if (IsNotActiveTarget(target) || target.IsDeadCondition() || !IsHitRange(character, skill.Range, target))
-                                        {
-                                            GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : Target is Not Available.");
-                                            isRetarget = true;
-                                        }
-                                        break;
-                                }
-                            }
+                            isRetarget = CheckSkillTargetAvailable(skill, character, target);
                         }
                         else if (character.selectedItem.item.expendable != null)
                         {
@@ -8854,6 +8719,75 @@ namespace Yukar.Battle
                     else if (gameSettings.useBehindParty)
                     {
                         isRetarget = character.targetCharacter[0].IsBehindPartyCondition() || character.IsBehindPartyCondition();
+                    }
+                    break;
+            }
+
+            return isRetarget;
+        }
+
+        private bool CheckSkillTargetAvailable(Rom.NSkill skill, BattleCharacterBase character, BattleCharacterBase target)
+        {
+            bool isRetarget = false;
+
+            switch (skill.option.target)
+            {
+                case Rom.TargetType.ENEMY_ONE:
+                case Rom.TargetType.PARTY_ALL_ENEMY_ONE:
+                case Rom.TargetType.SELF_ENEMY_ONE:
+                case Rom.TargetType.OTHERS_ENEMY_ONE:
+                    if (skill.enemyEffect != null)
+                    {
+                        if (IsNotActiveTarget(target) || target.IsDeadCondition())
+                        {
+                            GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : Target is Already Extinct.");
+                            isRetarget = true;
+                        }
+                        else if (character.EnemyPartyRefMember.Exists(x => x.HateCondition != 0))
+                        {
+                            GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : To Apply Hate Condition.");
+                            isRetarget = true;
+                        }
+                        else if (!IsHitRange(character, skill.Range, target))
+                        {
+                            GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : Target is So Far.");
+                            isRetarget = true;
+                        }
+                    }
+                    break;
+
+                case Rom.TargetType.PARTY_ONE:
+                case Rom.TargetType.PARTY_ONE_ENEMY_ALL:
+                    if (skill.friendEffect != null)
+                    {
+                        if (IsNotActiveTarget(target))
+                        {
+                            GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : Target is Already Extinct.");
+                            isRetarget = true;
+                        }
+                        else if (!IsHitRange(character, skill.Range, target))
+                        {
+                            GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : Target is So Far.");
+                            isRetarget = true;
+                        }
+                        // 蘇生効果ありで対象が死んでいないか戦闘不能者のみの場合は無効
+                        // Invalid if there is a resurrection effect and the target is not dead or only incapacitated
+                        else if (skill.friendEffect.HasDeadCondition(catalog))
+                        {
+                            if (!target.IsDeadCondition() && skill.IsOnlyForDown(catalog))
+                            {
+                                GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : Target is Alive.");
+                                isRetarget = true;
+                            }
+                        }
+                        else
+                        {
+                            if (target.IsDeadCondition())
+                            {
+                                GameMain.PushLog(DebugDialog.LogEntry.LogType.BATTLE, character.Name, "Retarget / Cause : Target is Dead.");
+                                isRetarget = true;
+                            }
+                        }
                     }
                     break;
             }
@@ -8949,7 +8883,27 @@ namespace Yukar.Battle
                     break;
 
                 case BattleCommandType.Item:
-                    if (character.selectedItem.item.IsExpandable)
+                    if (character.selectedItem.item.IsExpandableWithSkill)
+                    {
+                        var skill = catalog.getItemFromGuid(character.selectedItem.item.expendableWithSkill.skill) as Common.Rom.NSkill;
+
+                        switch (skill.option.target)
+                        {
+                            case Rom.TargetType.ENEMY_ONE:
+                            case Rom.TargetType.PARTY_ALL_ENEMY_ONE:
+                            case Rom.TargetType.SELF_ENEMY_ONE:
+                            case Rom.TargetType.OTHERS_ENEMY_ONE:
+                                if (targetPartyMember.Count() > 0) targets.Add(targetPartyMember.ElementAt(battleRandom.Next(targetPartyMember.Count())));
+                                break;
+                            case Rom.TargetType.PARTY_ONE:
+                            case Rom.TargetType.PARTY_ONE_ENEMY_ALL:
+                                if (friendPartyMember.Count() > 0) targets.Add(friendPartyMember.ElementAt(battleRandom.Next(friendPartyMember.Count())));
+                                break;
+                        }
+
+                        targets.RemoveAll(x => !IsHitRange(character, skill.Range, x));
+                    }
+                    else if (character.selectedItem.item.IsExpandable)
                     {
                         if (character.selectedItem.item.expendable.HasRecoveryDeadCondition(catalog))
                         {
@@ -8967,42 +8921,6 @@ namespace Yukar.Battle
                         }
 
                         targets.RemoveAll(x => !IsHitRange(character, character.selectedItem.item.Range, x));
-                    }
-                    else if (character.selectedItem.item.IsExpandableWithSkill)
-                    {
-                        var skill = catalog.getItemFromGuid(character.selectedItem.item.expendableWithSkill.skill) as Common.Rom.NSkill;
-
-                        switch (skill.option.target)
-                        {
-                            case Rom.TargetType.PARTY_ONE:
-                            case Rom.TargetType.PARTY_ONE_ENEMY_ALL:
-                                if (skill.friendEffect.HasDeadCondition(catalog))
-                                {
-                                    var a = character.FriendPartyRefMember.Where(player => (skill.option.onlyForDown || player.HitPoint == 0)
-                                        && ((BattlePlayerData)player).player.isAvailableItem(character.selectedItem.item));
-
-                                    if (a.Count() > 0) targets.Add(a.ElementAt(battleRandom.Next(a.Count())));
-                                }
-                                else
-                                {
-                                    var a = character.FriendPartyRefMember.Where(player => player.HitPoint > 0
-                                        && ((BattlePlayerData)player).player.isAvailableItem(character.selectedItem.item));
-
-                                    if (a.Count() > 0) targets.Add(a.ElementAt(battleRandom.Next(a.Count())));
-                                }
-                                break;
-                            case Rom.TargetType.ENEMY_ONE:
-                            case Rom.TargetType.PARTY_ALL_ENEMY_ONE:
-                            case Rom.TargetType.SELF_ENEMY_ONE:
-                            {
-                                var a = character.EnemyPartyRefMember.Where(enemy => enemy.HitPoint > 0);
-
-                                if (a.Count() > 0) targets.Add(a.ElementAt(battleRandom.Next(a.Count())));
-                            }
-                            break;
-                        }
-
-                        targets.RemoveAll(x => !IsHitRange(character, skill.Range, x));
                     }
                     break;
             }

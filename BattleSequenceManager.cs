@@ -635,7 +635,8 @@ namespace Yukar.Battle
 
         internal void addVisibleEnemy(BattleEnemyData data)
         {
-            enemyMonsterViewData.Add(data);
+            var index = Math.Min(enemyMonsterViewData.Count, Math.Max(0, data.UniqueID - 1));
+            enemyMonsterViewData.Insert(index, data);
 
             var battleEnemyMax = enemyMonsterViewData.Count;
 
@@ -779,7 +780,7 @@ namespace Yukar.Battle
             }
             else
             {
-                return enemyData.IndexOf(self as BattleEnemyData);
+                return ((self as BattleEnemyData)?.UniqueID - 1) ?? -1;
             }
         }
 
@@ -1052,15 +1053,10 @@ namespace Yukar.Battle
             // Do you have a weapon?
             Rom.NItem weapon = null;
             Rom.Cast cast = null;
-            if (attacker is BattlePlayerData pl)
+            if (attacker is BattleCharacterBase battleCharacter)
             {
-                cast = pl.player.rom;
-                weapon = pl.player.equipments[0];
-            }
-            else if (attacker is BattleEnemyData enm)
-            {
-                cast = enm.monsterGameData.rom;
-                weapon = enm.monsterGameData.equipments[0];
+                cast = battleCharacter.Hero.rom;
+                weapon = battleCharacter.CurrentDamageEquipmentTuple?.Item2;
             }
             else if(attacker is MapCharacterBattleStatus mst)
             {
@@ -1111,6 +1107,8 @@ namespace Yukar.Battle
 
         private int CalcAttackWithWeaponDamage(BattleCharacterBase attacker, BattleCharacterBase target, AttackAttributeType attackAttribute, bool isCritical, List<BattleDamageTextInfo> textInfo)
         {
+            attacker.UseMultiWeaponAdjustValue = attacker.Hero.DamageEquipmentList.Count > 1;
+
             var damage = CalcAttackWithWeaponDamage(attacker, target, attackAttribute, isCritical, battleRandom);
 
             BattleDamageTextInfo.TextType textType = BattleDamageTextInfo.TextType.HitPointDamage;
@@ -1128,7 +1126,9 @@ namespace Yukar.Battle
 
             AddBattleDamageTextInfo(textInfo, textType, target, Math.Abs(damage).ToString(), statusId);
 
-            return damage;
+			attacker.UseMultiWeaponAdjustValue = false;
+
+			return damage;
         }
 
         public float EvalFormula(string formula, BattleCharacterBase attacker, BattleCharacterBase target, AttackAttributeType attackAttribute)
@@ -1943,7 +1943,7 @@ namespace Yukar.Battle
 
                             target.ConsistancyHPPercentConditions(catalog, battleEvents);
 
-                            BattleDamageTextInfo.TextType textType;
+							BattleDamageTextInfo.TextType textType;
                             var heal = effectValue > 0;
 
                             if (heal)
@@ -2218,11 +2218,13 @@ namespace Yukar.Battle
                     target.CommandReactionType = ReactionType.Heal;
                 else
                     target.CommandReactionType = ReactionType.None;
-            }
 
-            // 対象にスキル効果を反映
-            // Reflect skill effect on target
-            foreach (var target in enemyEffectTargets)
+				target.InitializeEquipmentReAttachCondition(battleEvents);
+			}
+
+			// 対象にスキル効果を反映
+			// Reflect skill effect on target
+			foreach (var target in enemyEffectTargets)
             {
                 bool isEffect = false;
                 bool isDisplayMiss = false;
@@ -2761,11 +2763,13 @@ namespace Yukar.Battle
                     target.CommandReactionType = ReactionType.Heal;
                 else
                     target.CommandReactionType = ReactionType.None;
-            }
 
-            // 与えたダメージ分 自分のHP, MPを回復する
-            // Recover HP and MP equal to the damage dealt
-            if ((friendSkillDrainPercentDic.Count > 0) || (enemySkillDrainPercentDic.Count > 0))
+				target.InitializeEquipmentReAttachCondition(battleEvents);
+			}
+
+			// 与えたダメージ分 自分のHP, MPを回復する
+			// Recover HP and MP equal to the damage dealt
+			if ((friendSkillDrainPercentDic.Count > 0) || (enemySkillDrainPercentDic.Count > 0))
             {
                 var totalDamageDic = new Dictionary<Guid, int>();
 
@@ -3033,9 +3037,11 @@ namespace Yukar.Battle
                     isEffect = true;
                 }
             }
-        }
 
-        private void PaySkillCost(BattleCharacterBase effecter, Rom.NSkill skill)
+			target.InitializeEquipmentReAttachCondition(battleEvents);
+		}
+
+		private void PaySkillCost(BattleCharacterBase effecter, Rom.NSkill skill)
         {
             // スキル発動時のコストとして発動者の消費ステータスを消費
             // Consumes the caster's consumption status as the skill activation cost.
@@ -3286,7 +3292,13 @@ namespace Yukar.Battle
                 bool isEffect = false;
                 bool isDisplayMiss = false;
 
+                // 状態付与
+                // Status grant
                 conditionAssignImpl(item.EffectParamSettings.GetAttachConditionList(), target, ref isEffect, ref isDisplayMiss);
+                if (isEffect)
+                {
+                    isUsedItem = true;
+                }
 
                 if (isDisplayMiss)
                 {
@@ -3296,15 +3308,17 @@ namespace Yukar.Battle
                 }
             }
 
-            // イベント開始
-            // event start
-            if (expendable.commonExec != Guid.Empty)
+			target.InitializeEquipmentReAttachCondition(battleEvents);
+
+			// イベント開始
+			// event start
+			if (expendable.commonExec != Guid.Empty)
             {
                 battleEvents.start(expendable.commonExec);
                 isUsedItem = true;
             }
 
-            return isUsedItem;
+			return isUsedItem;
         }
 
         private void UpdateEnhanceEffect(List<EnhanceEffect> enhanceEffects)
@@ -3327,7 +3341,7 @@ namespace Yukar.Battle
             {
                 player.ConsistancyHPPercentConditions(catalog, battleEvents);
 
-                if (player.HitPoint <= 0)
+				if (player.HitPoint <= 0)
                 {
                     // 戦闘不能時は実行予定のコマンドをキャンセルする
                     // Cancels scheduled commands when incapacitated
@@ -4478,9 +4492,7 @@ namespace Yukar.Battle
 
             // エフェクト先読み
             // Effect lookahead
-            GetCommandEffectImpl(commandSelectPlayer, catalog, out var efA, out var efB);
-            preloadEffect(efA);
-            preloadEffect(efB);
+            preloadEffect(commandSelectPlayer, catalog);
 
             battleEvents.start(Rom.Script.Trigger.BATTLE_AFTER_COMMAND_SELECT);
 
@@ -4523,7 +4535,7 @@ namespace Yukar.Battle
             }
         }
 
-        private void preloadEffect(Guid guid)
+        private void preloadEffectImpl(Guid guid)
         {
             var job = new EffectPreloadJob(guid, catalog);
             SharpKmyBase.Job.addJob(job);
@@ -4575,7 +4587,9 @@ namespace Yukar.Battle
             foreach (var player in playerData)
             {
                 player.InitializeBattleCommandDisabled(catalog);
-            }
+                player.CurrentDamageEquipmentIndex = 0;
+
+			}
 
             ChangeBattleState(BattleState.SelectActivePlayer);
         }
@@ -4589,10 +4603,15 @@ namespace Yukar.Battle
 
                 // エフェクト先読み
                 // Effect lookahead
-                GetCommandEffectImpl(monsterData, catalog, out var efA, out var efB);
-                preloadEffect(efA);
-                preloadEffect(efB);
+                preloadEffect(monsterData, catalog);
             }
+        }
+
+        private void preloadEffect(BattleCharacterBase chr, Catalog catalog)
+        {
+            GetCommandEffectImpl(chr, catalog, out var efA, out var efB);
+            preloadEffectImpl(efA);
+            preloadEffectImpl(efB);
         }
 
         /// <summary>
@@ -4610,8 +4629,10 @@ namespace Yukar.Battle
         {
             monsterData.counterAction = BattleEnemyData.CounterState.NONE;
             monsterData.selectedBattleCommandTags = null;
+            monsterData.CurrentDamageEquipmentIndex = 0;
 
-            if (monsterData.selectedBattleCommandType != BattleCommandType.Undecided)
+
+			if (monsterData.selectedBattleCommandType != BattleCommandType.Undecided)
             {
                 // イベントパネルから行動が強制指定されている場合にここに来る
                 // Comes here if an action is forced from the event panel
@@ -6224,7 +6245,7 @@ namespace Yukar.Battle
                     break;
             }
 
-            if(enemyEffectGuid == GUID_USE_ATTACKEFFEECT)
+            if (enemyEffectGuid == GUID_USE_ATTACKEFFEECT)
             {
                 enemyEffectGuid = activeCharacter.AttackEffect;
             }
@@ -6398,6 +6419,18 @@ namespace Yukar.Battle
                         // Are reflections occurring?
                         nextBattleState = BattleState.ExecuteReflection;
                     }
+					else if (((activeCharacter.selectedBattleCommandType == BattleCommandType.Attack) || (activeCharacter.selectedBattleCommandType == BattleCommandType.Critical)) &&
+                        (0 <= activeCharacter.CurrentDamageEquipmentIndex) && (activeCharacter.CurrentDamageEquipmentIndex + 1 < activeCharacter.Hero.DamageEquipmentList.Count))
+                    {
+						// ダメージがある装備が残ってる？
+						// Are there any equipment left that has damage?
+						activeCharacter.CurrentDamageEquipmentIndex++;
+                        activeCharacter.lastHitCheckResult = BattleCharacterBase.HitCheckResult.NONE;
+
+                        activeCharacter.ExecuteCommandStart();
+
+                        nextBattleState = BattleState.SetCommandMessageText;
+					}
                     else
                     {
                         // 連続行動がある？

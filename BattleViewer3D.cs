@@ -656,6 +656,11 @@ namespace Yukar.Battle
                 defaultSkillList.finalize();
                 result.finalize();
                 //selectSkill.finalize();
+                if (particleViewTexture != null)
+                {
+                    particleViewTexture.Dispose();
+                    particleViewTexture = null;
+                }
             }
 
             internal void reload(Rom.LayoutProperties.LayoutNode.UsageInGame usage)
@@ -2492,6 +2497,7 @@ namespace Yukar.Battle
                         if (start)
                         {
                             string motion = GetAttackMotion(self, null);
+
                             if (game.data.system.BattleCameraEnabled[Common.GameData.SystemData.BATTLE_CAMERA_SITUATION_ATTACK])
                             {
                                 actor.queueActorState(BattleActor.ActorStateType.ATTACK_WAIT, "", btc.attackTime);
@@ -2761,19 +2767,13 @@ namespace Yukar.Battle
         private string GetAttackMotion(BattleCharacterBase self, string defaultMotionName)
         {
             string motion = null;
-            if (self is BattlePlayerData)
+
+            if (self is BattleCharacterBase battleCharacter)
             {
-                var pl = self as BattlePlayerData;
-                if (pl.player.equipments[0] != null)
-                    motion = pl.player.equipments[0].weapon.motion;
+                motion = battleCharacter.CurrentDamageEquipmentTuple?.Item2?.weapon?.motion;
             }
-            else if (self is BattleEnemyData)
-            {
-                var weapon = catalog.getItemFromGuid(((BattleEnemyData)self).monster.equipWeapon) as Common.Rom.NItem;
-                if (weapon != null)
-                    motion = weapon.weapon?.Motion;
-            }
-            if (string.IsNullOrEmpty(motion))
+
+			if (string.IsNullOrEmpty(motion))
                 motion = defaultMotionName;
             return motion;
         }
